@@ -8,10 +8,19 @@ import (
 	"path"
 )
 
+var red (func(...interface{}) string) = color.New(color.FgRed).SprintFunc()
 var yellow (func(...interface{}) string) = color.New(color.FgYellow).SprintFunc()
 var green (func(...interface{}) string) = color.New(color.FgGreen).SprintFunc()
+var blue (func(...interface{}) string) = color.New(color.FgCyan).SprintFunc()
 
 func main() {
+	pluginDir := findNvimPluginDir()
+	fmt.Println(blue(pluginDir) + " targeted")
+	vimDir := findVimPluginDir()
+	fmt.Println(blue(vimDir) + " alternatively targeted")
+}
+
+func findNvimPluginDir() string {
 	xdgHome := os.Getenv("XDG_CONFIG_HOME")
 	if len(xdgHome) < 1 {
 		log.Println(yellow("Environment Variable XDG_CONFIG_HOME is not set" +
@@ -26,15 +35,37 @@ func main() {
 	configPath := path.Join(xdgHome, "nvim")
 	configDir, err := os.Open(configPath)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(red(err))
 	}
 	defer configDir.Close()
 	fmt.Println(green(configPath + " exists"))
 	bundlePath := path.Join(configPath, "bundle")
 	bundleDir, err := os.Open(bundlePath)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(red(err))
 	}
 	defer bundleDir.Close()
 	fmt.Println(green(bundlePath + " exists"))
+	return bundlePath
+}
+
+func findVimPluginDir() string {
+	vimConfig := os.Getenv("HOME")
+	fmt.Println("HOME=" + vimConfig)
+
+	configPath := path.Join(vimConfig, ".vim")
+	configDir, err := os.Open(configPath)
+	if err != nil {
+		log.Println(red(err))
+	}
+	defer configDir.Close()
+	fmt.Println(green(configPath + " exists"))
+	bundlePath := path.Join(configPath, "bundle")
+	bundleDir, err := os.Open(bundlePath)
+	if err != nil {
+		log.Println(red(err))
+	}
+	defer bundleDir.Close()
+	fmt.Println(green(bundlePath + " exists"))
+	return bundlePath
 }
