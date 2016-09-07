@@ -13,6 +13,9 @@ var yellow (func(...interface{}) string) = color.New(color.FgYellow).SprintFunc(
 var green (func(...interface{}) string) = color.New(color.FgGreen).SprintFunc()
 var blue (func(...interface{}) string) = color.New(color.FgCyan).SprintFunc()
 
+const NVIM_BUNDLE_NOT_FOUND string = "Unable to find bundle directory for neovim."
+const VIM_BUNDLE_NOT_FOUND string = "Unable to find bundle directory for vim."
+
 func main() {
 	pluginDir := findNvimPluginDir()
 	fmt.Println(blue(pluginDir) + " targeted")
@@ -36,6 +39,8 @@ func findNvimPluginDir() string {
 	configDir, err := os.Open(configPath)
 	if err != nil {
 		log.Println(red(err))
+		log.Println(red(NVIM_BUNDLE_NOT_FOUND))
+		return ""
 	}
 	defer configDir.Close()
 	fmt.Println(green(configPath + " exists"))
@@ -43,6 +48,8 @@ func findNvimPluginDir() string {
 	bundleDir, err := os.Open(bundlePath)
 	if err != nil {
 		log.Println(red(err))
+		log.Println(red(NVIM_BUNDLE_NOT_FOUND))
+		return ""
 	}
 	defer bundleDir.Close()
 	fmt.Println(green(bundlePath + " exists"))
@@ -57,6 +64,8 @@ func findVimPluginDir() string {
 	configDir, err := os.Open(configPath)
 	if err != nil {
 		log.Println(red(err))
+		log.Println(red(VIM_BUNDLE_NOT_FOUND))
+		return ""
 	}
 	defer configDir.Close()
 	fmt.Println(green(configPath + " exists"))
@@ -64,6 +73,8 @@ func findVimPluginDir() string {
 	bundleDir, err := os.Open(bundlePath)
 	if err != nil {
 		log.Println(red(err))
+		log.Println(red(VIM_BUNDLE_NOT_FOUND))
+		return ""
 	}
 	defer bundleDir.Close()
 	fmt.Println(green(bundlePath + " exists"))
