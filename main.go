@@ -29,12 +29,13 @@ Ex: (neovim) %[1]s $HOME/.config/nvim/bundle
 func main() {
 	// Override usage text
 	flag.Usage = printUsage
+	flag.Parse()
 
 	// Parse command line arguments
-	pluginPath := flag.Arg(0)
-	if pluginPath == "" {
+	if len(os.Args) < 2 {
 		printUsage()
 	}
+	pluginPath := os.Args[1]
 
 	// Find plugins
 	pluginDir, err := getDirectory(pluginPath)
