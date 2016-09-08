@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
@@ -15,16 +16,33 @@ var green (func(...interface{}) string) = color.New(color.FgGreen).SprintFunc()
 var blue (func(...interface{}) string) = color.New(color.FgCyan).SprintFunc()
 
 func main() {
-	pluginDir, err := findNvimPluginDir()
+	// Parse command line arguments
+	var vimVersion string
+	var pluginPath string
+	var pluginDirectoryFunction (func() (*os.File, error))
+	flag.StringVar(&vimVersion, "vim-version", "neovim", "values are \"vim\" or \"neovim\"")
+	flag.StringVar(&pluginPath, "plugin-path", "", "the path to your pathogen plugins")
+	flag.Parse()
+
+	// Handle args
+	switch vimVersion {
+	case "vim":
+		pluginDirectoryFunction = findVimPluginDir
+	case "neovim":
+		pluginDirectoryFunction = findNvimPluginDir
+	}
+	if pluginPath != "" {
+		pluginDirectoryFunction = func() (*os.File, error) {
+			return getDirectory(pluginPath)
+		}
+	}
+
+	// Find plugins
+	pluginDir, err := pluginDirectoryFunction()
 	if err != nil {
 		log.Println(red(err))
 	}
 	fmt.Println(blue(pluginDir.Name()) + " targeted")
-	vimDir, err := findVimPluginDir()
-	if err != nil {
-		log.Println(red(err))
-	}
-	fmt.Println(blue(vimDir.Name()) + " targeted")
 }
 
 // getDirectory returns the directory at the given path if it can be opened
