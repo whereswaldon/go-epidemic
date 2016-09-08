@@ -40,7 +40,7 @@ func main() {
 	// Find plugins
 	pluginDir, err := getDirectory(pluginPath)
 	if err != nil {
-		fmt.Println(os.Stderr, red(err))
+		fmt.Fprintln(os.Stderr, red(err))
 		os.Exit(1)
 	}
 	fmt.Println(blue(pluginDir.Name()) + " targeted")
