@@ -40,15 +40,7 @@ func findNvimPluginDir() (string, error) {
 	}
 
 	fmt.Println("XDG_CONFIG_HOME=" + xdgHome)
-
-	configPath := path.Join(xdgHome, "nvim")
-	configDir, err := os.Open(configPath)
-	if err != nil {
-		return "", errors.Wrapf(err, "Unable to find %s directory:", configPath)
-	}
-	defer configDir.Close()
-	fmt.Println(green(configPath + " exists"))
-	bundlePath := path.Join(configPath, "bundle")
+	bundlePath := path.Join(xdgHome, "nvim", "bundle")
 	bundleDir, err := os.Open(bundlePath)
 	if err != nil {
 		return "", errors.Wrapf(err, "Unable to find %s directory:", bundlePath)
@@ -61,17 +53,10 @@ func findNvimPluginDir() (string, error) {
 // findNvimPluginDir returns the directory in which neovim stores its plugins
 // or the empty string if it was unable to find the directory
 func findVimPluginDir() (string, error) {
-	vimConfig := os.Getenv("HOME")
-	fmt.Println("HOME=" + vimConfig)
+	home := os.Getenv("HOME")
+	fmt.Println("HOME=" + home)
 
-	configPath := path.Join(vimConfig, ".vim")
-	configDir, err := os.Open(configPath)
-	if err != nil {
-		return "", errors.Wrapf(err, "Unable to find %s directory:", configPath)
-	}
-	defer configDir.Close()
-	fmt.Println(green(configPath + " exists"))
-	bundlePath := path.Join(configPath, "bundle")
+	bundlePath := path.Join(home, ".vim", "bundle")
 	bundleDir, err := os.Open(bundlePath)
 	if err != nil {
 		return "", errors.Wrapf(err, "Unable to find %s directory:", bundlePath)
