@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"log"
 	"os"
-	"path"
 )
 
 var red (func(...interface{}) string) = color.New(color.FgRed).SprintFunc()
@@ -15,32 +14,31 @@ var yellow (func(...interface{}) string) = color.New(color.FgYellow).SprintFunc(
 var green (func(...interface{}) string) = color.New(color.FgGreen).SprintFunc()
 var blue (func(...interface{}) string) = color.New(color.FgCyan).SprintFunc()
 
+const MISSING_FLAG_ERROR string = `The plugin-path argument is required.
+Usage:
+go-epidemic --plugin-path=$HOME/.config/nvim/bundle
+  or
+go-epidemic --plugin-path=$HOME/.vim/bundle
+`
+
 func main() {
+	// Remove timestamp prefix
+	log.SetFlags(0)
+
 	// Parse command line arguments
-	var vimVersion string
 	var pluginPath string
-	var pluginDirectoryFunction (func() (*os.File, error))
-	flag.StringVar(&vimVersion, "vim-version", "neovim", "values are \"vim\" or \"neovim\"")
-	flag.StringVar(&pluginPath, "plugin-path", "", "the path to your pathogen plugins")
+	flag.StringVar(&pluginPath, "plugin-path", "", "REQUIRED: the path to your pathogen plugins")
 	flag.Parse()
 
 	// Handle args
-	switch vimVersion {
-	case "vim":
-		pluginDirectoryFunction = findVimPluginDir
-	case "neovim":
-		pluginDirectoryFunction = findNvimPluginDir
-	}
-	if pluginPath != "" {
-		pluginDirectoryFunction = func() (*os.File, error) {
-			return getDirectory(pluginPath)
-		}
+	if pluginPath == "" {
+		log.Fatalln(red(MISSING_FLAG_ERROR))
 	}
 
 	// Find plugins
-	pluginDir, err := pluginDirectoryFunction()
+	pluginDir, err := getDirectory(pluginPath)
 	if err != nil {
-		log.Println(red(err))
+		log.Fatalln(red(err))
 	}
 	fmt.Println(blue(pluginDir.Name()) + " targeted")
 }
@@ -50,33 +48,12 @@ func main() {
 func getDirectory(directoryPath string) (*os.File, error) {
 	directory, err := os.Open(directoryPath)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to open %s:", directory)
+		return nil, errors.Wrapf(err, "Unable to open %s:", directoryPath)
 	}
 	if fileInfo, err := directory.Stat(); err != nil {
-		return nil, errors.Wrapf(err, "Unable to access metadata for %s:", directory)
+		return nil, errors.Wrapf(err, "Unable to access metadata for %s:", directory.Name())
 	} else if !fileInfo.IsDir() {
-		return nil, fmt.Errorf("%s is not a directory", directory)
+		return nil, fmt.Errorf("%s is not a directory", directory.Name())
 	}
 	return directory, nil
-}
-
-// findNvimPluginDir returns the directory in which neovim stores its plugins
-// or the empty string if it was unable to find the directory.
-func findNvimPluginDir() (*os.File, error) {
-	xdgHome := os.Getenv("XDG_CONFIG_HOME")
-	if len(xdgHome) < 1 {
-		fmt.Println(yellow("$XDG_CONFIG_HOME undefined. Inferring default value..."))
-		xdgHome = path.Join(os.Getenv("HOME"), ".config")
-	}
-
-	bundlePath := path.Join(xdgHome, "nvim", "bundle")
-	return getDirectory(bundlePath)
-}
-
-// findNvimPluginDir returns the directory in which neovim stores its plugins
-// or the empty string if it was unable to find the directory.
-func findVimPluginDir() (*os.File, error) {
-	home := os.Getenv("HOME")
-	bundlePath := path.Join(home, ".vim", "bundle")
-	return getDirectory(bundlePath)
 }
