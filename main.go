@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
-	"log"
 	"os"
 )
 
@@ -14,33 +13,42 @@ var yellow (func(...interface{}) string) = color.New(color.FgYellow).SprintFunc(
 var green (func(...interface{}) string) = color.New(color.FgGreen).SprintFunc()
 var blue (func(...interface{}) string) = color.New(color.FgCyan).SprintFunc()
 
-const MISSING_FLAG_ERROR string = `The plugin-path argument is required.
-Usage:
-go-epidemic --plugin-path=$HOME/.config/nvim/bundle
-  or
-go-epidemic --plugin-path=$HOME/.vim/bundle
+const USAGE_MESSAGE string = `
+%[1]s path
+
+path -- the path to where your pathogen vim plugins are stored.
+	This is generally the bundle directory within your vim
+	configuration.
+	Ex: (neovim) $HOME/.config/nvim/bundle
+	    (vim)    $HOME/.vim/bundle
+
+Ex: (neovim) %[1]s $HOME/.config/nvim/bundle
+    (vim)    %[1]s $HOME/.vim/bundle
 `
 
 func main() {
-	// Remove timestamp prefix
-	log.SetFlags(0)
+	// Override usage text
+	flag.Usage = printUsage
 
 	// Parse command line arguments
-	var pluginPath string
-	flag.StringVar(&pluginPath, "plugin-path", "", "REQUIRED: the path to your pathogen plugins")
-	flag.Parse()
-
-	// Handle args
+	pluginPath := flag.Arg(0)
 	if pluginPath == "" {
-		log.Fatalln(red(MISSING_FLAG_ERROR))
+		printUsage()
 	}
 
 	// Find plugins
 	pluginDir, err := getDirectory(pluginPath)
 	if err != nil {
-		log.Fatalln(red(err))
+		fmt.Println(os.Stderr, red(err))
+		os.Exit(1)
 	}
 	fmt.Println(blue(pluginDir.Name()) + " targeted")
+}
+
+// printUsage prints usage information to stderr and exits with an error status.
+func printUsage() {
+	fmt.Fprintf(os.Stderr, "Usage of %s:\n%s", os.Args[0], fmt.Sprintf(USAGE_MESSAGE, os.Args[0]))
+	os.Exit(2)
 }
 
 // getDirectory returns the directory at the given path if it can be opened
