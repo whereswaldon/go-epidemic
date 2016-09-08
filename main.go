@@ -13,7 +13,7 @@ var yellow (func(...interface{}) string) = color.New(color.FgYellow).SprintFunc(
 var green (func(...interface{}) string) = color.New(color.FgGreen).SprintFunc()
 var blue (func(...interface{}) string) = color.New(color.FgCyan).SprintFunc()
 
-const USAGE_MESSAGE string = `
+const usageMessage string = `
 %[1]s path
 
 path -- the path to where your pathogen vim plugins are stored.
@@ -48,7 +48,7 @@ func main() {
 
 // printUsage prints usage information to stderr and exits with an error status.
 func printUsage() {
-	fmt.Fprintf(os.Stderr, "Usage of %s:\n%s", os.Args[0], fmt.Sprintf(USAGE_MESSAGE, os.Args[0]))
+	fmt.Fprintf(os.Stderr, "Usage of %s:\n%s", os.Args[0], fmt.Sprintf(usageMessage, os.Args[0]))
 	os.Exit(2)
 }
 
