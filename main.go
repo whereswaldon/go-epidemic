@@ -28,13 +28,18 @@ func main() {
 }
 
 // getDirectory returns the directory at the given path if it can be opened
-// and nil with an error otherwise.
-func getDirectory(path) (*os.File, error) {
-	directory, err := os.Open(bundlePath)
+// and confirmed to be a directory.
+func getDirectory(directoryPath string) (*os.File, error) {
+	directory, err := os.Open(directoryPath)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to find %s directory:", directory)
+		return nil, errors.Wrapf(err, "Unable to open %s:", directory)
 	}
-	return directory, err
+	if fileInfo, err := directory.Stat(); err != nil {
+		return nil, errors.Wrapf(err, "Unable to access metadata for %s:", directory)
+	} else if !fileInfo.IsDir() {
+		return nil, fmt.Errorf("%s is not a directory", directory)
+	}
+	return directory, nil
 }
 
 // findNvimPluginDir returns the directory in which neovim stores its plugins
