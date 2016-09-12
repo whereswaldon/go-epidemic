@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"os"
+
 )
 
 var red (func(...interface{}) string) = color.New(color.FgRed).SprintFunc()
@@ -39,6 +40,7 @@ func main() {
 
 	// Find plugins
 	pluginDir, err := getDirectory(pluginPath)
+	defer pluginDir.Close()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, red(err))
 		os.Exit(1)
@@ -52,17 +54,28 @@ func printUsage() {
 	os.Exit(2)
 }
 
+// isDir returns whether a given path points to a directory. If checking this information
+// produces an error, that is returned as well.
+func isDirectory(path string) (bool, error) {
+	stats, err := os.Stat(path)
+	if err != nil {
+		return false, errors.Wrapf(err, "Could not stat %s to check if directory", path)
+	}
+	return stats.IsDir(), nil
+}
+
 // getDirectory returns the directory at the given path if it can be opened
 // and confirmed to be a directory.
 func getDirectory(directoryPath string) (*os.File, error) {
+	if ok, err := isDirectory(directoryPath); err != nil {
+		return nil, errors.Wrapf(err, "Unable to check whether %s is a directory", directoryPath)
+	} else if !ok {
+		return nil, fmt.Errorf("%s is not a directory", directoryPath)
+	}
+	// if you get here, it's a directory
 	directory, err := os.Open(directoryPath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unable to open %s:", directoryPath)
-	}
-	if fileInfo, err := directory.Stat(); err != nil {
-		return nil, errors.Wrapf(err, "Unable to access metadata for %s:", directory.Name())
-	} else if !fileInfo.IsDir() {
-		return nil, fmt.Errorf("%s is not a directory", directory.Name())
 	}
 	return directory, nil
 }
