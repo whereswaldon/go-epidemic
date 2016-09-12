@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 var red (func(...interface{}) string) = color.New(color.FgRed).SprintFunc()
@@ -91,6 +92,30 @@ func updateGitRepo(path string, done chan int) {
 		done <- 0
 		return
 	}
+	// Update remote branches
+	gitUpdate := exec.Command("git", "remote", "update", "origin")
+	err = gitUpdate.Run()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, errors.Wrapf(err, yellow("Unable to run `git remote update origin` in directory %s"), path))
+		done <- 0
+		return
+	}
+	// Check whether current branch is out of date with upstream
+	gitStatus := exec.Command("git", "status")
+	currentStatus, err := gitStatus.Output()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, errors.Wrapf(err, yellow("Unable to get stdout from `git status` in directory %s"), path))
+		done <- 0
+		return
+	}
+	currentStatusString := string(currentStatus[:])
+	if !strings.Contains(currentStatusString, "behind") {
+		fmt.Printf(blue("Nothing to update for %s\n"), path)
+		done <- 0
+		return
+
+	}
+	// Pull if out of date
 	gitPull := exec.Command("git", "pull")
 	err = gitPull.Run()
 	if err != nil {
