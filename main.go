@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 )
 
@@ -55,7 +56,7 @@ func main() {
 	}
 	plugins := make([]string, 0)
 	for _, candidate := range pluginCandidates {
-		fullPath := pluginDir.Name() + string(os.PathSeparator) + candidate.Name()
+		fullPath := path.Join(pluginDir.Name(), candidate.Name())
 		fmt.Printf("Checking %15s...", candidate.Name())
 		if ok, err := isGitRepository(fullPath); err != nil {
 			fmt.Fprintln(os.Stderr, yellow(err))
