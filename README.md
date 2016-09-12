@@ -1,5 +1,5 @@
 # go-epidemic
-A vim/neovim pathogen plugin autoupdater
+A vim/neovim pathogen plugin updater
 
 ## Install
 Requires `go`. If you don't have `go` installed, please follow the directions [here](https://golang.org/doc/install).
