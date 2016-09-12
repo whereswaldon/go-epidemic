@@ -65,8 +65,12 @@ func main() {
 			fmt.Println(red("NO"))
 		}
 	}
-	fmt.Printf(green("%d plugins found\n"), len(plugins))
 	numberPlugins := len(plugins)
+	fmt.Printf(green("%d plugins found\n"), numberPlugins)
+	if numberPlugins < 1 {
+		fmt.Println(yellow("No plugins found; nothing to update"))
+		os.Exit(0)
+	}
 	updatesCompleted := make(chan int, 0)
 	for _, repository := range plugins {
 		go updateGitRepo(repository, updatesCompleted)
