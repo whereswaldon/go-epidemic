@@ -79,7 +79,7 @@ func main() {
 	for i := 0; i < numberPlugins; i++ {
 		<-updatesCompleted
 	}
-	fmt.Println(green("Plugins updated."))
+	fmt.Println(green("Plugins up to date."))
 
 }
 
