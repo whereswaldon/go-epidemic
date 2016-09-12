@@ -6,7 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"os"
-
+	"os/exec"
 )
 
 var red (func(...interface{}) string) = color.New(color.FgRed).SprintFunc()
@@ -76,6 +76,26 @@ func main() {
 	}
 	fmt.Println(green("Plugins updated."))
 
+}
+
+// updateGitRepo runs the command `git pull` within the given directory
+// and signals that it is done by sending a value on the done channel.
+func updateGitRepo(path string, done chan int) {
+	err := os.Chdir(path)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, errors.Wrapf(err, yellow("Unable to change directories to %s"), path))
+		done <- 0
+		return
+	}
+	gitPull := exec.Command("git", "pull")
+	err = gitPull.Run()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, errors.Wrapf(err, yellow("Unable to run `git pull` in directory %s"), path))
+		done <- 0
+		return
+	}
+	fmt.Printf(blue("%s updated\n"), path)
+	done <- 0
 }
 
 // isGitRepository checks whether a path points to the root directory of a git
