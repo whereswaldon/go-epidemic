@@ -7,7 +7,7 @@ Make sure that `$GOPATH/bin` is in your `$PATH`.
 Run `go get github.com/whereswaldon/go-epidemic`.
 
 ## Usage
-Run `go-epidemic <path-to-your-plugin directory>`.
+Run `go-epidemic <path-to-your-plugin-directory>`.
 Usually, this will look like `go-epidemic ~/.vim/bundle` or `go-epidemic ~/.config/nvim/bundle`
 Set this up on a schedule with the scheduling utility of your choice to update your
 plugins at set intervals.
